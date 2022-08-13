@@ -25,6 +25,11 @@ file_modified() {
   echo "[$TIMESTAMP]: The file $1$2 was modified" | tee -a "$INOTIFY_LOG"
 }
 
+file_attrib() {
+  TIMESTAMP=$(date)
+  echo "[$TIMESTAMP]: The file $1$2 attribute was modified" | tee -a "$INOTIFY_LOG"
+}
+
 file_created() {
   TIMESTAMP=$(date)
   echo "[$TIMESTAMP]: The file $1$2 was created" | tee -a "$INOTIFY_LOG"
@@ -35,8 +40,11 @@ clear_log() {
   touch "$INOTIFY_LOG"
 }
 
-inotifywait -q -m -r -e modify,delete,create $1 | while read DIRECTORY EVENT FILE; do
+inotifywait -q -m -r -e modify,delete,create,attrib $1 | while read DIRECTORY EVENT FILE; do
   case $EVENT in
+    ATTRIB*)
+      file_attrib "$DIRECTORY" "$FILE"
+      ;;
     MODIFY*)
       file_modified "$DIRECTORY" "$FILE"
       ;;
